@@ -4,6 +4,7 @@
 ## local paquages
 import graph_creator
 import run_stats
+import data_class
 
 
 ## paquages

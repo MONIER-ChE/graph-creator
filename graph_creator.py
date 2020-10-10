@@ -34,6 +34,8 @@ for bar in chart (working for 1, 2, 3 groupin plot (pre/post training | base, pr
 '''
 
 
+## class for hold graph
+
 
 
 def grouped_bar_plot(a_mean, b_mean, a_std, b_std, groups_labels, variables_labels, grouped_describe):
@@ -174,10 +176,10 @@ def grouped_bar_plot(a_mean, b_mean, a_std, b_std, groups_labels, variables_labe
     
 
 
-    draw('Age', grouped_describe)
-    draw('Force max de grip (N)', grouped_describe)
+    #draw('Age', grouped_describe)
+    #draw('Force max de grip (N)', grouped_describe)
 
-    #draw_different('Force max de grip (N)','Age', grouped_describe)
+    draw_different('Force max de grip (N)','Age', grouped_describe)
 
     
     
