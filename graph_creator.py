@@ -2,6 +2,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 
+
+
 ## Plot style
 plt.style.use('bmh') ## ggplot
 
@@ -14,18 +16,20 @@ plt.rcParams['lines.linewidth'] = 1.5
 plt.rcParams['legend.facecolor'] = '#FFFAFA'
 
 ## Grid
-plt.rcParams['axes.grid'] = True# display grid or not
-plt.rcParams['axes.grid.axis'] = 'y'## which axis the grid should apply to
+
+plt.rcParams['grid.linestyle'] = '--' # linestyle
+
 
 ## to define
 plt.rcParams['axes.labelsize']= 8
 plt.rcParams['legend.fontsize']= 10
 plt.rcParams['xtick.labelsize']= 10
 plt.rcParams['ytick.labelsize']= 10
-plt.rcParams['text.usetex']= False
-plt.rcParams['figure.figsize']= [4.5, 4.5]
+#plt.rcParams['text.usetex']= False
 
 plt.rcParams['figure.figsize'] = 5, 10
+
+
 
 '''
 step
@@ -35,275 +39,123 @@ for bar in chart (working for 1, 2, 3 groupin plot (pre/post training | base, pr
 
 
 ## class for hold graph
+class plot:
+
+    def __init__(self, df):
+
+        self.df = df
 
 
-
-def grouped_bar_plot(a_mean, b_mean, a_std, b_std, groups_labels, variables_labels, grouped_describe):
-    '''
-    function for build grouped bar plot 
-    '''
-
-    x = np.arange(len(variables_labels))  # the label locations
-    width = 0.25  # the width of the bars
-
-    fig, ax = plt.subplots()
-    
-    a_bar = ax.bar(x - width/2, 
-                    a_mean, width, 
-                    label=groups_labels[0], 
-                    yerr=a_std, 
-                    align='center', 
-                    capsize = 10, 
-                    alpha=0.8) #capsize = limit to error bar
-
-                    
-
-    b_bar = ax.bar(x + width/2, 
-                    b_mean, width, 
-                    label=groups_labels[1], 
-                    yerr=b_std, 
-                    align='center', 
-                    capsize = 10,
-                    alpha=0.8) # trasnparency
-
-    
-
-
-    # Add some text for labels, title and custom x-axis tick labels, etc.
-    #ax.set_ylabel('Values')
-    #ax.set_xlabel('Variables')
-    ax.set_title('Title to define')
-    ax.set_xticks(x)
-    ax.set_xticklabels(variables_labels)
-    ax.legend()
-
-
-    
-    def statistic(bars, variables_labels):
-        '''
-        Create data of position
-        '''
-        for var in variables_labels:
-            
-            grouped_describe[var, 'x_pos'] = ['NaN','NaN']
-
-
-        a = 0
-        ## Find each values for group A then group B
-        for bar in bars:
-            pos = []
-            
-            for data in bar:
-                pos.append(data.get_x()+0.25/2) # mid width size
-                
-            
-            i=0
-            ## Fill values with good variables
-            for var in variables_labels:
-                
-                grouped_describe[var,'x_pos'][a] = pos[i]
-                i+=1
-            a +=1
-            
-
-    
-    def draw(label, grouped_describe):
-        '''
-        create braket stats
-        '''
-
-        ylim = max(grouped_describe[label,'max'].iloc[0], grouped_describe[label,'max'].iloc[1])
-        length = grouped_describe[label,'x_pos'].iloc[0] + grouped_describe[label,'x_pos'].iloc[1]
+    def bar_plot(self):
         
-        test = ax.annotate("", 
-                    xy=(grouped_describe[label,'x_pos'].iloc[0], ylim), 
-                    xycoords='data',
-                    xytext=(grouped_describe[label,'x_pos'].iloc[1],ylim), 
-                    textcoords='data',
-                    arrowprops=dict(arrowstyle="-",
-                                    ec='#aaaaaa',
-                                    connectionstyle="bar,fraction=0.2",
-                                    linewidth=2))
-
-        #print(test) #Hold data if 2 take the same origin, put it higher ? 
-
-        # 0.5 is position of asterix
-        ax.text(length/2,
-                ylim + 5 ,
-                '*',
-                zorder=10,#order in z axis, so draw above all
-                horizontalalignment='center',
-                verticalalignment='center')
-
-
-
-        plt.ylim(0, ylim+50) # def lim depending of size of bar
+        ## play xith descibe df because it's more ez and load less ressources
+        test = self.df.describe()
+        print(test)
+        print(test.loc['mean'])
         
+        ax = self.df.plot.bar(rot=0,               # rot = text rot
+                            yerr=self.df.std(),   # error bar
+                            capsize = 10,       # add limit to error bars == width /2 is better
+                            alpha=0.8)          # transparency
 
 
-    def draw_different(label1,label2, grouped_describe):
-        '''
-        create braket stars above all other because he link long distance bar
-        '''
+        #print(ax.bar)
+        ax.xaxis.grid() # only x axis grid
+        # Add some text for labels, title and custom x-axis tick labels, etc.
+        #ax.set_ylabel('Values')
+        #ax.set_xlabel('Variables')
+        ax.set_title('Title to define')
 
-        ylim = max(grouped_describe[label1,'max'].iloc[0], grouped_describe[label2,'max'].iloc[1])
-        length = grouped_describe[label1,'x_pos'].iloc[0] + grouped_describe[label2,'x_pos'].iloc[1]
-        
-        ax.annotate("", 
-                    xy=(grouped_describe[label2,'x_pos'].iloc[0], ylim), 
-                    xycoords='data',
-                    xytext=(grouped_describe[label1,'x_pos'].iloc[1],ylim), 
-                    textcoords='data',
-                    arrowprops=dict(arrowstyle="-",
-                                    ec='#aaaaaa',
-                                    connectionstyle="bar,fraction=0.2",
-                                    linewidth=2))
-
-
-        # 0.5 is position of asterix
-        testo = ax.text(length/2,
-                ylim + 7,
-                '*',
-                zorder=10,#order in z axis, so draw above all
-                horizontalalignment='center',
-                verticalalignment='center')
-
-        print(testo)
-
-        plt.ylim(0, ylim+50) # def lim depending of size of bar
-        
-    statistic([a_bar, b_bar], variables_labels)
-    
-
-
-    #draw('Age', grouped_describe)
-    #draw('Force max de grip (N)', grouped_describe)
-
-    draw_different('Force max de grip (N)','Age', grouped_describe)
-
-    
-    
+        i = 0
+        x_pos = {}
 
 
 
+        print(test['Age']['mean'])
 
 
-    '''
-    def barplot_annotate_brackets(num1, num2, data, center, height, yerr=None, dh=.05, barh=.05, fs=None, maxasterix=None):
-        """ 
-        Annotate barplot with p-values.
-        https://stackoverflow.com/questions/11517986/indicating-the-statistically-significant-difference-in-bar-graph
+        ## detect if dataframes is grouped or not
+        if test.groups:
+            print('AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAa')
+            print(test)
+            print(test['mean'])
 
-        :param num1: number of left bar to put bracket over
-        :param num2: number of right bar to put bracket over
-        :param data: string to write or number for generating asterixes
-        :param center: centers of all bars (like plt.bar() input)
-        :param height: heights of all bars (like plt.bar() input)
-        :param yerr: yerrs of all bars (like plt.bar() input)
-        :param dh: height offset over bar / bar + yerr in axes coordinates (0 to 1)
-        :param barh: bar height in axes coordinates (0 to 1)
-        :param fs: font size
-        :param maxasterix: maximum number of asterixes to write (for very small p-values)
-        """
 
-        if type(data) is str:
-            text = data
+
         else:
-            # * is p < 0.05
-            # ** is p < 0.005
-            # *** is p < 0.0005
-            # etc.
-            text = ''
-            p = .05
+            ## get x values of each bar
+            for p in ax.patches:
 
-            while data < p:
-                text += '*'
-                p /= 10.
-
-                if maxasterix and len(text) == maxasterix:
-                    break
-
-            if len(text) == 0:
-                text = 'n. s.'
-
-        lx, ly = center[num1], height[num1]
-        rx, ry = center[num2], height[num2]
-
-        if yerr:
-            ly += yerr[num1]
-            ry += yerr[num2]
-
-        ax_y0, ax_y1 = plt.gca().get_ylim()
-        dh *= (ax_y1 - ax_y0)
-        barh *= (ax_y1 - ax_y0)
-
-        y = max(ly, ry) + dh
-
-        barx = [lx, lx, rx, rx]
-        bary = [y, y+barh, y+barh, y]
-        mid = ((lx+rx)/2, y+barh)
-
-        plt.plot(barx, bary, c='grey')
-
-        kwargs = dict(ha='center', va='bottom')
-        if fs is not None:
-            kwargs['fontsize'] = fs
-
-        plt.text(*mid, text, **kwargs)
-
-
-    bars = np.arange(len(b_mean))
-    barplot_annotate_brackets(0, 1, '*', bars, b_mean)
-
-
-    bars = np.arange(len(a_mean))
-    barplot_annotate_brackets(0, 1, '*', bars, a_mean)
-    '''
-
-
-
-
-
-
-
-
-
-
-
-    '''
-    ##### EDIT THIS TO MAKE A FUNCTION MATCHING WITH
-    def correlation_bracket(pos_bar_1, pos_bar_2):
-        y_max = np.max(np.concatenate((a_mean, b_mean)))
-        y_min = np.min(np.concatenate((a_mean, b_mean)))
+                x_pos[self.df.columns[i]] = p.get_x() + p.get_width() /2
+                i += 1
         
-        # xy is the fist columns
-        # xytest is the second problem
-        # But here the columns are one for 2 (groued bar consider like 1)
-        # for xytext 2nd data is th offset
 
-        ax.annotate("", 
-                    xy=(0, y_max), 
-                    xycoords='data',
-                    xytext=(1, y_max), 
-                    textcoords='data',
-                    arrowprops=dict(arrowstyle="-",
-                                    ec='#aaaaaa',
-                                    connectionstyle="bar,fraction=0.2"))
-
-        # 0.5 is position of asterix
-        ax.text(0.5,
-                y_max + abs(y_max - y_min)*0.1,
-                '*',
-                horizontalalignment='center',
-                verticalalignment='center')
+        
+        
+        ''' # for grouped values
+        # here for assing number for group + columns
+        for group,variable in self.df:
+            print(group) #1st
+            print(variable) # vars
+            names = {group : variable}
+        #print(self.df.groups)
+        '''       
+        
+        
 
 
+        ## link two plot
+        def statistical_bracket(df, x_pos, bar1, bar2):
 
-        plt.ylim(0, 100) # def lim depending of size of bar
-    '''
+            
+            ## check if columns are side to side or separated
+            if max(df.columns.get_loc(bar1), df.columns.get_loc(bar2)) - min(df.columns.get_loc(bar1), df.columns.get_loc(bar2)) == 1:
+            
+                y_max = max(df[bar1]['mean'] + df[bar1]['std'], df[bar2]['mean'] + df[bar2]['std'])
+            
+            else:
+                y_max = []
+
+                ## For index beginning columns to end columns, find the maximum 
+                for i in range(min(df.columns.get_loc(bar1), df.columns.get_loc(bar2)), max(df.columns.get_loc(bar1), df.columns.get_loc(bar2))):
+                    
+                    y_max.append(df.loc['mean'][i] + df.loc['std'][i]) 
+
+                y_max = max(y_max)
+
+            ## adjust values for being above std bar and create x y coordinate
+            y_max *= 1.2
+            x = [x_pos[bar1], x_pos[bar1], x_pos[bar2], x_pos[bar2]]
+            y = [(df[bar1]['mean'] + df[bar1]['std'])*1.1, y_max, y_max, (df[bar2]['mean'] + df[bar2]['std'])*1.1]
+
+            # plotting the line 
+            plt.plot(x, y)
+
+        statistical_bracket(test, x_pos,  'Force max de grip (N)', 'Age')
+
+
+        # pts 1 above error bar 
+        # pts 2 x point above
+        # pts 3 horizontal line by adjusting x value
+        # pts 4 down x points
+
+        # + 2 hline for good looking or grouping bar ### plt.axhline(y=60, xmin=0.1, xmax=0.9) # horizontal line
+
+   
+
+        #plt.axhline(y=60, xmin=0.1, xmax=0.9) # horizontal line
+
+        #plt.axvline(x=0.5, ymin=0.1, ymax=0.9) # vertical line
 
 
 
-    fig.tight_layout()
-    plt.show()    
-    #savefig("1.svg") # or: "1.pdf" (depending on a backend)
+
+        # adjust staring point and length for matching with 2 bar plot
+
+        plt.ylim(0, 200) # def lim depending of size of bar
+
+        plt.tight_layout()
+        plt.show() 
+        #savefig("1.svg") # or: "1.pdf" (depending on a backend)
+
+        

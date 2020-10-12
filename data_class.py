@@ -9,8 +9,11 @@ import inquirer
 
 from scipy import stats
 
+## other script
+import graph_creator
 
-class graph:
+
+class data:
   def __init__(self, file_path = '',
                 sheet = '',
                 test_type = None,
@@ -28,17 +31,10 @@ class graph:
     self.test_type = test_type
 
 
-    
-    '''
-    def plot(self):
-        print("Hello my name is " + self.name)
-    '''
-
-
 
 ## Run 
 print("Hello don't forget to put all data in columns")
-p1 = graph()
+p1 = data()
 
 
 questions = [
@@ -136,25 +132,22 @@ else:
 columns_name = p1.df.columns.values.tolist()
 
 
-## Ask for variables
-questions = [
-inquirer.Checkbox('variables',
-                    message="Choose the variables (press space to select one or more)",
-                    choices=columns_name,
-                    ),
-]
+## Ask for variables (min 1)
+while not p1.variables :
+    questions = [
+    inquirer.Checkbox('variables',
+                        message="Choose the variables (press space to select one or more)",
+                        choices=columns_name,
+                        ),
+    ]
 
-## Launch questions and hold anwsers
-p1.variables = inquirer.prompt(questions)
-p1.variables = p1.variables['variables']
-
-print(p1.variables)
-print(columns_name)
+    ## Launch questions and hold anwsers
+    p1.variables = inquirer.prompt(questions)
+    p1.variables = p1.variables['variables']
 
 
 ## Remove item from list choice
 for item in p1.variables:
-    print(item)
     columns_name.remove(item)
 
 
@@ -171,11 +164,47 @@ p1.grouping_variables = inquirer.prompt(questions)
 p1.grouping_variables = p1.grouping_variables['grouping_variable']
 
 
+## remove usless columns from df
+for var in p1.df.columns:
+    if var not in p1.variables + p1.grouping_variables:
+        del p1.df[var]
+
+
 ## If there are no grouping variables, basic plot
 if not p1.grouping_variables:
     print('p')
 
+    ## Else create grouping df
+else:
+    
+    #create custom column from all grouping vars
+    if len(p1.grouping_variables) > 1:
+        
+        #create custom column from all grouping vars
+        p1.df['group'] = p1.df[p1.grouping_variables].agg('-'.join, axis=1)
 
+        ## remove usless columns from df
+        for var in p1.df.columns:
+            if var not in p1.variables and var != 'group':
+                del p1.df[var]
+    
+        p1.df = p1.df.groupby(p1.df['group'])
+        #print(p1.df.describe())
+    
+    #group data from the column
+    else: 
+        p1.df = p1.df.groupby(p1.grouping_variables)
+
+
+## create bar plot
+graph_creator.plot(p1.df).bar_plot()
+
+## create descriptive table with LaTeX | render if from calling pdflatex from console or find pther way
+'''
+with open('mytable.tex', 'w') as tf:
+     tf.write(df.to_latex())
+     ## + generate pdf or vector image
+'''
 
 
 
@@ -190,14 +219,10 @@ answers.update(inquirer.prompt(questions))
 
 # Remove first choice from list
 
-
-
 ## Create group from the anwser
 grouped = data.groupby(answers['grouping_variable'])
 #grouped.group to obtain list of groups
     #print(grouped.get_grou
-
-
 
 '''
 
