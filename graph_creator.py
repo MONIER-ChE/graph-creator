@@ -41,72 +41,49 @@ for bar in chart (working for 1, 2, 3 groupin plot (pre/post training | base, pr
 ## class for hold graph
 class plot:
 
-    def __init__(self, df):
+    def __init__(self, df=None, ax=None, grouped=True):
 
         self.df = df
+        self.ax = ax
+        self.grouped = grouped
 
 
-    def bar_plot(self):
-        
-        ## play xith descibe df because it's more ez and load less ressources
-        test = self.df.describe()
-        print(test)
-        print(test.loc['mean'])
-        
-        ax = self.df.plot.bar(rot=0,               # rot = text rot
-                            yerr=self.df.std(),   # error bar
-                            capsize = 10,       # add limit to error bars == width /2 is better
-                            alpha=0.8)          # transparency
+
+    ## link two plot
+    def statistical_bracket(self, bar1=[], bar2=[]):
 
 
-        #print(ax.bar)
-        ax.xaxis.grid() # only x axis grid
-        # Add some text for labels, title and custom x-axis tick labels, etc.
-        #ax.set_ylabel('Values')
-        #ax.set_xlabel('Variables')
-        ax.set_title('Title to define')
-
-        i = 0
         x_pos = {}
+        i = 0
+
+        ## For grouped var
+        if self.grouped == True:
+
+            df = self.df.mean()
+            x_pos = {}
+            for row in df.index:
+                
+                x_pos[row] = {}
+                for variable in df:
+                    
+                    # get x value value position of bars
+                    x_pos[row][variable] = self.ax.patches[i].get_x() + self.ax.patches[i].get_width() /2
+                    i += 1
 
 
-
-        print(test['Age']['mean'])
-
-
-        ## detect if dataframes is grouped or not
-        if test.groups:
-            print('AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAa')
-            print(test)
-            print(test['mean'])
-
-
-
+        ## For non-grouped var
         else:
-            ## get x values of each bar
-            for p in ax.patches:
 
+            for p in self.ax.patches:
+                
+                # get x value position of bars
                 x_pos[self.df.columns[i]] = p.get_x() + p.get_width() /2
                 i += 1
-        
 
-        
-        
-        ''' # for grouped values
-        # here for assing number for group + columns
-        for group,variable in self.df:
-            print(group) #1st
-            print(variable) # vars
-            names = {group : variable}
-        #print(self.df.groups)
-        '''       
-        
-        
+            print(x_pos)
 
-
-        ## link two plot
-        def statistical_bracket(df, x_pos, bar1, bar2):
-
+            
+            df = self.df.describe()
             
             ## check if columns are side to side or separated
             if max(df.columns.get_loc(bar1), df.columns.get_loc(bar2)) - min(df.columns.get_loc(bar1), df.columns.get_loc(bar2)) == 1:
@@ -123,6 +100,7 @@ class plot:
 
                 y_max = max(y_max)
 
+
             ## adjust values for being above std bar and create x y coordinate
             y_max *= 1.2
             x = [x_pos[bar1], x_pos[bar1], x_pos[bar2], x_pos[bar2]]
@@ -131,31 +109,54 @@ class plot:
             # plotting the line 
             plt.plot(x, y)
 
-        statistical_bracket(test, x_pos,  'Force max de grip (N)', 'Age')
-
-
-        # pts 1 above error bar 
-        # pts 2 x point above
-        # pts 3 horizontal line by adjusting x value
-        # pts 4 down x points
-
-        # + 2 hline for good looking or grouping bar ### plt.axhline(y=60, xmin=0.1, xmax=0.9) # horizontal line
-
-   
-
-        #plt.axhline(y=60, xmin=0.1, xmax=0.9) # horizontal line
-
-        #plt.axvline(x=0.5, ymin=0.1, ymax=0.9) # vertical line
-
-
-
-
-        # adjust staring point and length for matching with 2 bar plot
-
-        plt.ylim(0, 200) # def lim depending of size of bar
 
         plt.tight_layout()
         plt.show() 
+            
+
+    # pts 1 above error bar 
+    # pts 2 x point above
+    # pts 3 horizontal line by adjusting x value
+    # pts 4 down x points
+
+    # + 2 hline for good looking or grouping bar ### plt.axhline(y=60, xmin=0.1, xmax=0.9) # horizontal line
+
+
+
+    #plt.axhline(y=60, xmin=0.1, xmax=0.9) # horizontal line
+    #plt.axvline(x=0.5, ymin=0.1, ymax=0.9) # vertical line
+
+
+    # adjust staring point and length for matching with 2 bar plot
+
+    plt.ylim(0, 200) # def lim depending of size of bar
+    
+
+
+
+
+    def bar_plot(self):
+        
+        df = self.df.mean()
+        yerr = self.df.std()
+
+        self.ax = df.plot.bar(rot=0,            # rot = text rot
+                            yerr=yerr,          # error bar
+                            capsize = 10,       # add limit to error bars == width /2 is better
+                            alpha=0.8)          # transparency
+
+
+        #print(ax.bar)
+        
+        ## ask later
+        self.ax.xaxis.grid() # only x axis grid
+        # Add some text for labels, title and custom x-axis tick labels, etc.
+        #ax.set_ylabel('Values')
+        #ax.set_xlabel('Variables')
+        #self.ax.set_title('Title to define')
+        
+
+
         #savefig("1.svg") # or: "1.pdf" (depending on a backend)
 
         

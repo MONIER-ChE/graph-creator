@@ -173,6 +173,9 @@ for var in p1.df.columns:
 ## If there are no grouping variables, basic plot
 if not p1.grouping_variables:
     print('p')
+    
+    plot = graph_creator.plot()
+    plot.grouped = False
 
     ## Else create grouping df
 else:
@@ -189,15 +192,69 @@ else:
                 del p1.df[var]
     
         p1.df = p1.df.groupby(p1.df['group'])
-        #print(p1.df.describe())
+        #print(p1.df.describe
     
     #group data from the column
     else: 
         p1.df = p1.df.groupby(p1.grouping_variables)
 
 
-## create bar plot
-graph_creator.plot(p1.df).bar_plot()
+    plot = graph_creator.plot()
+
+## assign df
+plot.df = p1.df
+
+
+## create bar plot using grouping parameter
+plot.bar_plot()
+
+
+
+
+## create stats test part
+
+## use function to draw statistical bracket using dict (key 1 (Age)) link to 1 or more vars or 2 list ? idk for now$
+# like choose one ore more var to link (1link) ? 
+# choose the var linked 
+# ex : age + force link taille + poid (large hoizontal line)
+plot.statistical_bracket('Force max de grip (N)', 'Age')
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+'''
+# no grouping var = index
+#print(describe.loc['mean'])
+
+
+# x group var (index = Jeune/vieux or jeune-H, Jeune, F, Vieux-F,...)
+print(describe.index)
+print(describe.columns) # to use
+
+
+print(describe['Taille']['mean'])
+for var, test in describe:
+    print(var, test)
+'''
+
+
 
 ## create descriptive table with LaTeX | render if from calling pdflatex from console or find pther way
 '''
@@ -205,11 +262,6 @@ with open('mytable.tex', 'w') as tf:
      tf.write(df.to_latex())
      ## + generate pdf or vector image
 '''
-
-
-
-
-
 
 
 
@@ -225,21 +277,6 @@ grouped = data.groupby(answers['grouping_variable'])
     #print(grouped.get_grou
 
 '''
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
