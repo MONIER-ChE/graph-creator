@@ -46,10 +46,10 @@ questions = [
                     )]
 
 
-## Launch questions and hold anwsers
-anwsers = inquirer.prompt(questions)
+## Launch questions and hold answers
+answers = inquirer.prompt(questions)
 
-p1.file = anwsers['file_path']
+p1.file = answers['file_path']
 ## TO REMOVE
 p1.file = '/home/yam/Downloads/TD3_etudiant.xls'
 
@@ -69,10 +69,10 @@ questions = [
 ]
 
 
-## Launch questions and hold anwsers
-anwsers = inquirer.prompt(questions)
+## Launch questions and hold answers
+answers = inquirer.prompt(questions)
 
-p1.sheet = anwsers['sheet']
+p1.sheet = answers['sheet']
 
 
 
@@ -96,7 +96,7 @@ questions = [
 ]
 
 
-## Launch questions and hold anwsers
+## Launch questions and hold answers
 p1.test_type = inquirer.prompt(questions)
 p1.test_type = p1.test_type['test_type']
 
@@ -141,7 +141,7 @@ while not p1.variables :
                         ),
     ]
 
-    ## Launch questions and hold anwsers
+    ## Launch questions and hold answers
     p1.variables = inquirer.prompt(questions)
     p1.variables = p1.variables['variables']
 
@@ -159,7 +159,7 @@ questions = [
             ),
 ]
 
-## Launch questions and hold anwsers
+## Launch questions and hold answers
 p1.grouping_variables = inquirer.prompt(questions)
 p1.grouping_variables = p1.grouping_variables['grouping_variable']
 
@@ -172,7 +172,6 @@ for var in p1.df.columns:
 
 ## If there are no grouping variables, basic plot
 if not p1.grouping_variables:
-    print('p')
     
     plot = graph_creator.plot()
     plot.grouped = False
@@ -209,6 +208,69 @@ plot.df = p1.df
 plot.bar_plot()
 
 
+## ask if he want to draw stars (waiting the automatisation process)
+questions = [
+    inquirer.Confirm('stars',
+                  message='Do you want to draw statistical bracket between bars ?')
+]
+
+answers = inquirer.prompt(questions)
+
+
+if answers['stars'] == True:
+    print('a')
+
+    if plot.grouped == True:
+
+        
+
+        ## While loop of 1 associate to 2 or 1+ to 2 etc while the user don't check FINISH
+        questions = [
+            inquirer.List('group_link_A',
+                        message="Please select The A group",
+                        choices=p1.df.groups,
+                    ),
+            inquirer.List('stars_link_A',
+                        message="Please select one or more A values to link to B",
+                        choices=p1.variables,
+                    ),
+            inquirer.List('group_link_B',
+                        message="Please select the B group",
+                        choices=p1.df.groups,
+                    ),
+            inquirer.List('stars_link_B',
+                        message="Please select one or more B values to get linked",
+                        choices=p1.variables,
+                    ),
+        ]
+
+        answers = inquirer.prompt(questions)
+        print(answers)
+        plot.grouped_statistical_bracket(answers['group_link_A'], answers['stars_link_A'], answers['group_link_B'], answers['stars_link_B'])
+
+
+    else:
+
+
+                ## While loop of 1 associate to 2 or 1+ to 2 etc while the user don't check FINISH
+        questions = [
+
+            inquirer.List('stars_link_A',
+                        message="Please select one or more A values to link to B",
+                        choices=p1.variables,
+                    ),
+
+            inquirer.List('stars_link_B',
+                        message="Please select one or more B values to get linked",
+                        choices=p1.variables,
+                    ),
+        ]
+
+        answers = inquirer.prompt(questions)
+        print(answers)
+
+        plot.statistical_bracket(answers['stars_link_A'], answers['stars_link_B'])
+
 
 
 ## create stats test part
@@ -217,7 +279,7 @@ plot.bar_plot()
 # like choose one ore more var to link (1link) ? 
 # choose the var linked 
 # ex : age + force link taille + poid (large hoizontal line)
-plot.statistical_bracket('Force max de grip (N)', 'Age')
+
 
 
 
