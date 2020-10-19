@@ -1,209 +1,266 @@
-#!/usr/bin/env python
 
-
-## local paquages
-import graph_creator
-import run_stats
-import data_class
-
-
-## paquages
-import matplotlib.pyplot as plt
-import pandas as pd
 import inquirer
+import pandas as pd
 
-from scipy import stats
-
-
-
-## Create dict to hold anwsers
-answers = {}
-
-
-# remove it later
-answers.update(file_path = '/home/yam/Downloads/TD3_etudiant.xls')
+import data_class
+import graph_creator
 
 
 
-'''
-## Ask file to open
+## Run 
+print("Hello don't forget to put all data in columns")
+p1 = data_class.data()
+
+
 questions = [
-  inquirer.Path('file_path',
-                 message="Put the path of your file?",
-                 path_type=inquirer.Path.FILE,
-                ),
-]
-answers.update(inquirer.prompt(questions))
-'''
+    
+    ## Ask file to open
+    inquirer.Path('file_path',
+                    message="Put the path of your file?",
+                    path_type=inquirer.Path.FILE,
+                    )]
+
+
+## Launch questions and hold answers
+answers = inquirer.prompt(questions)
+
+p1.file = answers['file_path']
+## TO REMOVE
+p1.file = '/home/yam/Downloads/TD3_etudiant.xls'
 
 
 
 ## Get excel file class
-full_data = pd.ExcelFile(answers['file_path'])
+full_data = pd.ExcelFile(p1.file)
 
 
-## Ask if use selected sheet or not (all)
+## Ask if use selected sheet
 questions = [
-    inquirer.List('spreadsheet',
-                message="Choose the spreadsheet to use ",
+    # Ask for sheet to use
+    inquirer.List('sheet',
+                message="Choose the sheet to use ",
                 choices=full_data.sheet_names,
-            ),
+            )
 ]
 
-answers.update(inquirer.prompt(questions))
+
+## Launch questions and hold answers
+answers = inquirer.prompt(questions)
+
+p1.sheet = answers['sheet']
 
 
-## Select data spreadsheet and create df
-data = pd.read_excel(answers['file_path'], sheet_name=answers['spreadsheet'])
-print('This is your data :\n \n',data)
 
 
-#get the list of variables
-columns = data.columns.values.tolist()
+
+## Select data sheet and create df
+p1.df = pd.read_excel(p1.file, sheet_name=p1.sheet)
+print('\nThis is your data : \n \n',p1.df)
 
 
 ## Ask type of test
 questions = [
     inquirer.List('test_type',
                 message="Choose the statistic test you want to use",
-                choices=['Idependant T-Test', 'Dependant T-Test', 'No one'],
-            ),
+                choices=['Idependant T-Test',
+                        'Dependant T-Test',
+                        'ANOVA',
+                        'Reapeated mesures ANOVA',
+                        'No one'],
+            )
 ]
 
-answers.update(inquirer.prompt(questions))
-#print('You choose :', answers['test_type'])
+
+## Launch questions and hold answers
+p1.test_type = inquirer.prompt(questions)
+p1.test_type = p1.test_type['test_type']
 
 
-## Option for just create braket (add grouping or not variables)
-if answers['test_type'] == 'No one':
-    ## Ask type of test
+## Statistical test choice
+if p1.test_type == 'Idependant T-Test':
+    print('oui')
+
+elif p1.test_type == 'Dependant T-Test':
+    print('oui')
+
+elif p1.test_type == 'ANOVA':
+    print('oui')
+
+elif p1.test_type == 'Reapeated mesures ANOVA':
+    print('oui')
+
+    ## Focus on this part for now
+    '''
+    class method for each statistic test ? 
+    class method for plotting data (grouping or solo vars etc)
+
+    class method for drawing significative bracket 1 to 1or 2 to 2 or 1 to 2 etc
+
+    gitignore to removve some file of github git push ect
+
+    '''
+else:
+    print('choose how to plot var and var ')
+
+
+#get the list of variables
+columns_name = p1.df.columns.values.tolist()
+
+
+## Ask for variables (min 1)
+while not p1.variables :
     questions = [
-        inquirer.Checkbox('correlation_bracket',
-                    message="Choose a pair of variables you want to link",
-                    choices=columns
-                ),
-    ] 
-
-
-    answers.update(inquirer.prompt(questions))
-
-    ## Running steps using test choice
-elif answers['test_type'] == 'Idependant T-Test':
-
-
-    ## Ask grouping variable
-    questions = [
-        inquirer.List('grouping_variable',
-                    message="Choose the grouping variable",
-                    choices=columns,
-                ),
-    ]
-
-    answers.update(inquirer.prompt(questions))
-
-    # Remove first choice from list
-    columns.remove(answers['grouping_variable'])
-
-
-    ## Create group from the anwser
-    grouped = data.groupby(answers['grouping_variable'])
-    #grouped.group to obtain list of groups
-    #print(grouped.get_group('Jeune'))## Obtain data of only one group
-
-
-
-    ## Ask type of relation (≠ or > or <)
-    questions = [
-        inquirer.List('relation',
-                    message="Choose the relation",
-                    choices=['A ≠ B', 'A > B', 'B < A'],
-                ),
-    ]
-
-    answers.update(inquirer.prompt(questions))
-
-
-
-
-    ## Ask wich one is group A and wich one is group B 
-    questions = [
-        inquirer.List('a_group',
-                    message="Choose the groupe A",
-                    choices=grouped.groups.keys(),
-                ),
-    ]
-
-    answers.update(inquirer.prompt(questions))
-
-
-
-
-    ## Ask for dependent variables
-    questions = [
-    inquirer.Checkbox('dependent_variables',
-                        message="Choose the dependent variables (press space to select one or more)",
-                        choices=columns,
+    inquirer.Checkbox('variables',
+                        message="Choose the variables (press space to select one or more)",
+                        choices=columns_name,
                         ),
     ]
 
-    answers.update(inquirer.prompt(questions))
+    ## Launch questions and hold answers
+    p1.variables = inquirer.prompt(questions)
+    p1.variables = p1.variables['variables']
 
 
-    ## Create b group label from the A choose
-    b_group = list(grouped.groups.keys())
-    b_group.remove(answers['a_group'])
-
-    ## Get separate data from the result
-    a_group = grouped.get_group(answers['a_group'])
-    b_group = grouped.get_group(b_group[0])
+## Remove item from list choice
+for item in p1.variables:
+    columns_name.remove(item)
 
 
-    ## T- Test
-    test_results = {}
+## Ask grouping variable
+questions = [
+    inquirer.Checkbox('grouping_variable',
+                message="If you have grouping variables, please select one or more",
+                choices=columns_name,
+            ),
+]
 
-    test_results['a_mean'] = []
-    test_results['b_mean'] = []
-    test_results['a_std'] = []
-    test_results['b_std'] = []
+## Launch questions and hold answers
+p1.grouping_variables = inquirer.prompt(questions)
+p1.grouping_variables = p1.grouping_variables['grouping_variable']
 
-    for variable in answers['dependent_variables']:
+
+## remove usless columns from df
+for var in p1.df.columns:
+    if var not in p1.variables + p1.grouping_variables:
+        del p1.df[var]
+
+
+## If there are no grouping variables, basic plot
+if not p1.grouping_variables:
+    
+    plot = graph_creator.plot()
+    plot.grouped = False
+
+    ## Else create grouping df
+else:
+    
+    #create custom column from all grouping vars
+    if len(p1.grouping_variables) > 1:
         
-        # T-Test
-        test_results[variable] = stats.ttest_ind(a_group[variable], b_group[variable])
+        #create custom column from all grouping vars
+        p1.df['group'] = p1.df[p1.grouping_variables].agg('-'.join, axis=1)
 
-        ## mean and std hand
-        test_results['a_mean'].append(a_group[variable].mean())
-        test_results['b_mean'].append(b_group[variable].mean())
-        test_results['a_std'].append(a_group[variable].std())
-        test_results['b_std'].append(b_group[variable].std())
-
-
-    graph_creator.grouped_bar_plot(test_results['a_mean'], 
-                                    test_results['b_mean'], 
-                                    test_results['a_std'], 
-                                    test_results['b_std'], 
-                                    list(grouped.groups), 
-                                    list(answers['dependent_variables']),
-                                    grouped.describe())
-    #
-    #graph_creator.grouped_bar_plot(test_results['mean'], test_results['std'], a_group.columns.values.tolist())
+        ## remove usless columns from df
+        for var in p1.df.columns:
+            if var not in p1.variables and var != 'group':
+                del p1.df[var]
+    
+        p1.df = p1.df.groupby(p1.df['group'])
+        #print(p1.df.describe
+    
+    #group data from the column
+    else: 
+        p1.df = p1.df.groupby(p1.grouping_variables)
 
 
+    plot = graph_creator.plot()
+
+## assign df
+plot.df = p1.df
 
 
-    ## Levene Test for Equal Variances check random population choice in grouping before do statistics
-    #stat, p = stats.levene(grouped) 
+## create bar plot using grouping parameter
+plot.bar_plot()
+
+
+## ask if he want to draw stars (waiting the automatisation process)
+questions = [
+    inquirer.Confirm('stars',
+                  message='Do you want to draw statistical bracket between bars ?')
+]
+
+answers = inquirer.prompt(questions)
+
+
+if answers['stars'] == True:
+    print('a')
+
+    if plot.grouped == True:
+
+        
+
+        ## While loop of 1 associate to 2 or 1+ to 2 etc while the user don't check FINISH
+        questions = [
+            inquirer.List('group_link_A',
+                        message="Please select The A group",
+                        choices=p1.df.groups,
+                    ),
+            inquirer.List('stars_link_A',
+                        message="Please select one or more A values to link to B",
+                        choices=p1.variables,
+                    ),
+            inquirer.List('group_link_B',
+                        message="Please select the B group",
+                        choices=p1.df.groups,
+                    ),
+            inquirer.List('stars_link_B',
+                        message="Please select one or more B values to get linked",
+                        choices=p1.variables,
+                    ),
+        ]
+
+        answers = inquirer.prompt(questions)
+        print(answers)
+        plot.grouped_statistical_bracket(answers['group_link_A'], answers['stars_link_A'], answers['group_link_B'], answers['stars_link_B'])
+
+
+    else:
+
+
+                ## While loop of 1 associate to 2 or 1+ to 2 etc while the user don't check FINISH
+        questions = [
+
+            inquirer.List('stars_link_A',
+                        message="Please select one or more A values to link to B",
+                        choices=p1.variables,
+                    ),
+
+            inquirer.List('stars_link_B',
+                        message="Please select one or more B values to get linked",
+                        choices=p1.variables,
+                    ),
+        ]
+
+        answers = inquirer.prompt(questions)
+        print(answers)
+
+        plot.statistical_bracket(answers['stars_link_A'], answers['stars_link_B'])
+
+
+
+## create stats test part
+
+## use function to draw statistical bracket using dict (key 1 (Age)) link to 1 or more vars or 2 list ? idk for now$
+# like choose one ore more var to link (1link) ? 
+# choose the var linked 
+# ex : age + force link taille + poid (large hoizontal line)
 
 
 
 
-    ################################################
-    ## Ask for descriptive statistics
-    # Do you want an descriptive tables ? 
-    # if yes, wich data you want ? (mean, std, quartiles, etc)
 
-    ## Directly create descriptive stats image
-    describe = grouped.describe()
+
+
 
 
 
@@ -220,42 +277,64 @@ elif answers['test_type'] == 'Idependant T-Test':
 
 
 '''
+# no grouping var = index
+#print(describe.loc['mean'])
+
+
+# x group var (index = Jeune/vieux or jeune-H, Jeune, F, Vieux-F,...)
+print(describe.index)
+print(describe.columns) # to use
+
+
+print(describe['Taille']['mean'])
+for var, test in describe:
+    print(var, test)
+'''
+
+
+
+## create descriptive table with LaTeX | render if from calling pdflatex from console or find pther way
+'''
+with open('mytable.tex', 'w') as tf:
+     tf.write(df.to_latex())
+     ## + generate pdf or vector image
+'''
+
+
+
+'''
+## if 'grouping_variables'not empty, ...
+answers.update(inquirer.prompt(questions))
+
+# Remove first choice from list
+
+## Create group from the anwser
+grouped = data.groupby(answers['grouping_variable'])
+#grouped.group to obtain list of groups
+    #print(grouped.get_grou
+
+'''
+
+
+
+# Do you want an descriptive plot ? 
+'''
+EXEMPLE OF MULTIPLE QUESTIONS
+## Ask if use selected sheet or not (all)
 questions = [
-    inquirer.List('graph_type',
-                message="Chose the spreadshit  ",
-                choices=['bar plot', 'line'],
+
+    
+    ## Ask file to open
+    inquirer.Path('file_path',
+                    message="Put the path of your file?",
+                    path_type=inquirer.Path.FILE,
+                    ),
+    
+
+    # Ask for sheet to use
+    inquirer.List('sheet',
+                message="Choose the sheet to use ",
+                choices=full_data.sheet_names,
             ),
 ]
-answers = inquirer.prompt(questions)
-
-
-
-## Dependent samples t-test ################################################
-
-## ANOVA ################################################
-
-
-
-
-
-
-
-
-
-
-## Ask for bar plot
-confirm = {
-    inquirer.Confirm('error-bar',
-                     message="Do you want to plot error bars ?" ,
-                     default=True),
-}
-confirmation = inquirer.prompt(confirm)
-print (confirmation['error-bar'])
-
-
-
-
-
-
-print(data)
 '''
