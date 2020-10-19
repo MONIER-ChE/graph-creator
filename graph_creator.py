@@ -109,11 +109,7 @@ class plot:
         #plt.axvline(x=0.5, ymin=0.1, ymax=0.9) # vertical line
 
 
-        # adjust staring point and length for matching with 2 bar plot
 
-        #plt.ylim(0, 200) # def lim depending of size of bar
-        plt.tight_layout()
-        plt.show() 
 
 
     ## link two plot For grouped var
@@ -189,9 +185,6 @@ class plot:
         ## plot text, for now just a star
         plt.text((x[-1]+x[0])/2, y_max, '*')
 
-
-        plt.tight_layout()
-        plt.show() 
 
 
 

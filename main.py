@@ -1,7 +1,10 @@
 
+## external paquages
 import inquirer
 import pandas as pd
+import matplotlib.pyplot as plt
 
+## internal paquages
 import data_class
 import graph_creator
 
@@ -190,15 +193,15 @@ questions = [
 ]
 
 answers = inquirer.prompt(questions)
+while answers['stars'] == True:
 
-
-if answers['stars'] == True:
-    print('a')
+    ##create dict for holding answers for further link
+    link = {}
 
     if plot.grouped == True:
 
         
-
+        ## Use step by step awnser to use result in text like 'in groupe "Age", wich variables
         ## While loop of 1 associate to 2 or 1+ to 2 etc while the user don't check FINISH
         questions = [
             inquirer.List('group_link_A',
@@ -242,9 +245,33 @@ if answers['stars'] == True:
         ]
 
         answers = inquirer.prompt(questions)
-        print(answers)
+
 
         plot.statistical_bracket(answers['stars_link_A'], answers['stars_link_B'])
+
+    ## ask if he want to draw stars (waiting the automatisation process)
+    questions = [
+    inquirer.Confirm('stars',
+                  message='Do you want to draw statistical bracket between bars ?')
+    ]
+    
+    answers = inquirer.prompt(questions)
+
+plt.tight_layout()
+plt.show() 
+
+
+'''
+# adjust staring point and length for matching with 2 bar plot
+
+#plt.ylim(0, 200) # def lim depending of size of bar
+plt.tight_layout()
+plt.show() 
+'''
+
+
+
+
 
 
 
